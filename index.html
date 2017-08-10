@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>打砖块小游戏</title>
+    <style>
+        .game-canves{
+        border: 1px solid #000;
+        margin: 40px auto 0;
+        display: block;
+        }
+        </style>
+        <script>
+        window.onload = function(){
+            //获取画板dom对象
+            var gameCanves = document.querySelector('#game-canves');
+            //获取canves对象
+            var context = gameCanves.getContext('2d');
+
+            //球的位置
+            var ballPosition = {
+                x: 50,
+                y: 300,
+            };
+
+            //帧率
+            var fps = 60;
+
+            //挡板的移动速度
+            var speed = 10;
+
+            //移动是否开启
+            var isMove = false;
+
+            //挡板位置
+            var bafflePosition = {
+                x: 50,
+                y: 350,
+            }
+
+            //画球
+            function drawBall(x, y){
+                context.fillStyle = '#000';
+                context.beginPath();
+                context.arc(x || 50, y || 300, 15, 0, Math.PI * 2, true);
+                context.closePath();
+                context.fill();
+            }
+            drawBall();
+
+            //画挡板
+            function drawBaffle(x, y){
+                context.fillStyle = '#0000ff';
+                context.beginPath();
+                context.rect(x || 50, y || 350 ,180, 30);
+                context.closePath();
+                context.fill();
+            }
+            drawBaffle();
+
+            //按键按下监听
+            window.addEventListener('keydown', function(event){
+                var key = event.key;
+                if(key == 'ArrowLeft'){
+                    isMove = true;
+                    speed = -10;
+                    // context.clearRect(0, 0 ,gameCanves.getAttribute('width'), gameCanves.getAttribute('height'));
+                    // bafflePosition.x -= 10;
+                    // drawBaffle(bafflePosition.x, bafflePosition.y);
+                    // drawBall(ballPosition.x, ballPosition.y);
+                }else if(key == 'ArrowRight'){
+                    isMove = true;
+                    speed = 10;
+                    // context.clearRect(0, 0 ,gameCanves.getAttribute('width'), gameCanves.getAttribute('height'));
+                    // bafflePosition.x += 10;
+                    // drawBaffle(bafflePosition.x, bafflePosition.y);
+                    // drawBall(ballPosition.x, ballPosition.y);
+                }
+            });
+
+            //按键放开监听
+            window.addEventListener('keyup', function(event){
+                var key = event.key;
+                if(key == 'ArrowLeft'){
+                    isMove = false;
+                    // speed = -10;
+                    // context.clearRect(0, 0 ,gameCanves.getAttribute('width'), gameCanves.getAttribute('height'));
+                    // bafflePosition.x -= 10;
+                    // drawBaffle(bafflePosition.x, bafflePosition.y);
+                    // drawBall(ballPosition.x, ballPosition.y);
+                }else if(key == 'ArrowRight'){
+                    isMove = false;
+                    // speed = 10;
+                    // context.clearRect(0, 0 ,gameCanves.getAttribute('width'), gameCanves.getAttribute('height'));
+                    // bafflePosition.x += 10;
+                    // drawBaffle(bafflePosition.x, bafflePosition.y);
+                    // drawBall(ballPosition.x, ballPosition.y);
+                }
+            });
+
+            setInterval(function(){
+                if(!isMove) return ;
+
+                context.clearRect(0, 0 ,gameCanves.getAttribute('width'), gameCanves.getAttribute('height'));
+                if(bafflePosition.x <= 0){
+                    bafflePosition.x = 0;
+                }else if(bafflePosition.x >= gameCanves.getAttribute('width') - 180){
+                    bafflePosition.x = gameCanves.getAttribute('width') - 180;
+                }else{
+                    bafflePosition.x += speed;
+                }
+                bafflePosition.x += speed;
+                drawBaffle(bafflePosition.x, bafflePosition.y);
+                drawBall(ballPosition.x, ballPosition.y);
+            }, 1000 /fps);
+        }
+    </script>
+</head>
+<body>
+    <canvas width="600" height="400" id="game-canves" class="game-canves"></canvas>
+</body>
+</html>
