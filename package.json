@@ -1,0 +1,23 @@
+{
+  "name": "js.game",
+  "version": "1.0.0",
+  "description": "js small game",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OpenSourceLearners/js.game.git"
+  },
+  "keywords": [
+    "js",
+    "game"
+  ],
+  "author": "xmc",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OpenSourceLearners/js.game/issues"
+  },
+  "homepage": "https://github.com/OpenSourceLearners/js.game#readme"
+}
