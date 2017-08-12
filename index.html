@@ -6,115 +6,216 @@
     <title>打砖块小游戏</title>
     <style>
         .game-canves{
-        border: 1px solid #000;
-        margin: 40px auto 0;
-        display: block;
+            border: 1px solid #000;
+            margin: 40px auto 0;
+            display: block;
         }
-        </style>
-        <script>
-        window.onload = function(){
-            //获取画板dom对象
-            var gameCanves = document.querySelector('#game-canves');
-            //获取canves对象
-            var context = gameCanves.getContext('2d');
-
-            //球的位置
-            var ballPosition = {
-                x: 50,
-                y: 300,
+    </style>
+    <script>
+        //画板对象
+        var Drawing = function(canves){
+            var context = canves.getContext('2d');
+            var o = {
+                ctx: context,
+                width: canves.width,
+                height: canves.height,
             };
 
-            //帧率
-            var fps = 60;
-
-            //挡板的移动速度
-            var speed = 10;
-
-            //移动是否开启
-            var isMove = false;
-
-            //挡板位置
-            var bafflePosition = {
-                x: 50,
-                y: 350,
+            //清空画板
+            o.clear = function(){
+                this.ctx.clearRect(0, 0 ,this.width, this.height);
             }
 
             //画球
-            function drawBall(x, y){
-                context.fillStyle = '#000';
-                context.beginPath();
-                context.arc(x || 50, y || 300, 15, 0, Math.PI * 2, true);
-                context.closePath();
-                context.fill();
-            }
-            drawBall();
-
+            o.drawBall = function(x, y, radius){
+                this.ctx.fillStyle = '#000';
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, radius || 15, 0, Math.PI * 2, true);
+                this.ctx.closePath();
+                this.ctx.fill();
+            };
             //画挡板
-            function drawBaffle(x, y){
-                context.fillStyle = '#0000ff';
-                context.beginPath();
-                context.rect(x || 50, y || 350 ,180, 30);
-                context.closePath();
-                context.fill();
+            o.drawBaffle = function(x, y, width, height){
+                this.ctx.fillStyle = '#0000ff';
+                this.ctx.beginPath();
+                this.ctx.rect(x, y ,width || 180, height || 30);
+                this.ctx.closePath();
+                this.ctx.fill();
             }
-            drawBaffle();
-
-            //按键按下监听
-            window.addEventListener('keydown', function(event){
-                var key = event.key;
-                if(key == 'ArrowLeft'){
-                    isMove = true;
-                    speed = -10;
-                    // context.clearRect(0, 0 ,gameCanves.getAttribute('width'), gameCanves.getAttribute('height'));
-                    // bafflePosition.x -= 10;
-                    // drawBaffle(bafflePosition.x, bafflePosition.y);
-                    // drawBall(ballPosition.x, ballPosition.y);
-                }else if(key == 'ArrowRight'){
-                    isMove = true;
-                    speed = 10;
-                    // context.clearRect(0, 0 ,gameCanves.getAttribute('width'), gameCanves.getAttribute('height'));
-                    // bafflePosition.x += 10;
-                    // drawBaffle(bafflePosition.x, bafflePosition.y);
-                    // drawBall(ballPosition.x, ballPosition.y);
-                }
-            });
-
-            //按键放开监听
-            window.addEventListener('keyup', function(event){
-                var key = event.key;
-                if(key == 'ArrowLeft'){
-                    isMove = false;
-                    // speed = -10;
-                    // context.clearRect(0, 0 ,gameCanves.getAttribute('width'), gameCanves.getAttribute('height'));
-                    // bafflePosition.x -= 10;
-                    // drawBaffle(bafflePosition.x, bafflePosition.y);
-                    // drawBall(ballPosition.x, ballPosition.y);
-                }else if(key == 'ArrowRight'){
-                    isMove = false;
-                    // speed = 10;
-                    // context.clearRect(0, 0 ,gameCanves.getAttribute('width'), gameCanves.getAttribute('height'));
-                    // bafflePosition.x += 10;
-                    // drawBaffle(bafflePosition.x, bafflePosition.y);
-                    // drawBall(ballPosition.x, ballPosition.y);
-                }
-            });
-
-            setInterval(function(){
-                if(!isMove) return ;
-
-                context.clearRect(0, 0 ,gameCanves.getAttribute('width'), gameCanves.getAttribute('height'));
-                if(bafflePosition.x <= 0){
-                    bafflePosition.x = 0;
-                }else if(bafflePosition.x >= gameCanves.getAttribute('width') - 180){
-                    bafflePosition.x = gameCanves.getAttribute('width') - 180;
-                }else{
-                    bafflePosition.x += speed;
-                }
-                bafflePosition.x += speed;
-                drawBaffle(bafflePosition.x, bafflePosition.y);
-                drawBall(ballPosition.x, ballPosition.y);
-            }, 1000 /fps);
+            //画砖块
+            o.drawBrick = function(x, y, width, height){
+                this.ctx.fillStyle = '#000';
+                this.ctx.beginPath();
+                this.ctx.rect(x, y ,width || 40, height || 20);
+                this.ctx.closePath();
+                this.ctx.fill();
+            }
+            return o;
         }
+        //球对象
+        var Ball = function(){
+            var o = {
+                x: 200,
+                y: 300,
+                radius: 15,
+                speed: 5,
+                moveX: 1,
+                moveY: 1,
+                isRun: false,
+            };
+            //发射
+            o.fire = function(){
+                this.isRun = true;
+            }
+            o.move = function(drawing){
+                if(!this.isRun) return;
+                if(this.y >= drawing.height - this.radius || this.y < this.radius){
+                    this.moveY = -this.moveY;
+                }
+                if(this.x >= drawing.width - this.radius || this.x < this.radius){
+                    this.moveX = -this.moveX;
+                }
+                this.x += (this.speed * this.moveX);
+                this.y += (this.speed * this.moveY);
+            }
+            return o;
+        }
+        //挡板对象
+        var Baffle = function(){
+            var o = {
+                x: 50,
+                y: 350,
+                width: 180,
+                height: 20,
+                speed: 15,
+            };
+            //左移动
+            o.moveLeft = function(){
+                if(this.x < this.speed){
+                    this.x = 0;
+                }else{
+                    this.x -= 10;
+                }
+            }
+            //右移动
+            o.moveRight = function(width){
+                if(this.x > width - this.width - this.speed){
+                    this.x = width - this.width;
+                }else{
+                    this.x += 10;
+                }
+            }
+            var aInb = function(x , xMin, xMax){
+                return x > xMin && x < xMax;
+            }
+            o.collision = function(ball){
+                if(aInb(ball.x , o.x, o.x + o.width) || aInb(o.x + o.width / 2, ball.x - ball.radius, ball.x + ball.radius)){
+                    if(aInb(ball.y, o.y, o.y + o.height) || aInb(o.y + o.height / 2, ball.y - ball.radius, ball.y + ball.radius)){
+                        return true;
+                    }
+                }
+            }
+            return o;
+        }
+        //砖块对象
+        var Brick = function(x, y){
+            o = {
+                x: x,
+                y: y,
+                width: 60,
+                height: 20,
+                life: 1,
+            };
+            o.isHaveLife = function(){
+                return this.life > 0;
+            }
+            var aInb = function(x , xMin, xMax){
+                return x > xMin && x < xMax;
+            }
+            o.collision = function(ball){
+                if(aInb(ball.x , o.x, o.x + o.width) || aInb(o.x + o.width / 2, ball.x - ball.radius, ball.x + ball.radius)){
+                    if(aInb(ball.y, o.y, o.y + o.height) || aInb(o.y + o.height / 2, ball.y - ball.radius, ball.y + ball.radius)){
+                        this.life--;
+                        return true;
+                    }
+                }
+            }
+            return o;
+        }
+        //游戏对象
+        var Game = function(fps){
+            var o = {
+                fps: fps || 30,     //游戏帧率
+                isRun: false,       //是否运行游戏
+                actions: {},
+                keys: {},
+            };
+
+            //注册事件
+            o.registerEvent = function(key, callback){
+                o.actions[key] = callback;
+            }
+            o.update = function(){}
+            o.draw = function(){}
+            window.addEventListener('keydown', function(event){
+                o.keys[event.key] = true;
+            });
+            window.addEventListener('keyup', function(event){
+                o.keys[event.key] = false;
+            });
+            setInterval(function(){
+                //循环判断按钮是否被按钮，再执行函数
+                var actions = Object.keys(o.actions);
+                for(var i = 0; i < actions.length; i++){
+                    var key = actions[i];
+                    if(o.keys[key]) o.actions[key]();
+                }
+                //修改函数
+                o.update();
+                //画图函数
+                o.draw();
+            }, 1000/o.fps);
+            return o;
+        }
+        //游戏入口
+        var __main = function(){
+            //获取画板dom对象
+            var gameCanves = document.querySelector('#game-canves');
+            //创建画板对象
+            var drawing = Drawing(gameCanves);
+            //创建游戏对象
+            var game = Game(60);
+            //创建挡板
+            var baffle = Baffle();
+            //创建球
+            var ball= Ball();
+            //创建砖块
+            var brick = Brick(100, 100);
+
+            game.registerEvent('ArrowLeft', function(){
+                baffle.moveLeft();
+            });
+            game.registerEvent('ArrowRight', function(){
+                baffle.moveRight(drawing.width);
+            });
+            game.registerEvent('f', function(){
+                ball.fire();
+            })
+            game.update = function(){
+                if(baffle.collision(ball)) ball.moveY = -ball.moveY;
+                if(brick.isHaveLife() && brick.collision(ball)) ball.moveY = -ball.moveY;
+                ball.move(drawing);
+            }
+            game.draw = function(){
+                drawing.clear();
+                drawing.drawBall(ball.x, ball.y);
+                drawing.drawBaffle(baffle.x, baffle.y, baffle.width, baffle.height);
+                if(brick.isHaveLife()){
+                    drawing.drawBrick(brick.x, brick.y, brick.width, brick.height);
+                }
+            }
+        }
+        window.onload = __main;
     </script>
 </head>
 <body>
